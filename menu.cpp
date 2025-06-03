@@ -1,149 +1,142 @@
 #include "functions.h"
-#include <fstream>
 
-int main() {
-    //SetConsoleOutputCP(437);
-    //SetConsoleSize(110, 30);
-    //setlocale(LC_ALL, "ru");
-    pressKey(0x7A);
-    const int rows = 21, columns = 100;
-    char area[rows][columns], control;
-    bool lose = true;
-    int lane = 10,//Позиция автомобиля
-        gameCounter,
-        countHeal = 0,//Для спавна +
-        speed = 10,
-        endOfGame;
-
+bool menu() {
+    char upRight = char(187),
+        downRight = char(188),
+        upLeft = char(201),
+        downLeft = char(200),
+        horizont = char(205),
+        vertical = char(186),
+        space = char(32),
     
-    
-    
-    while (true) {
-        if (!menu())
-            exit(0);
-        system("cls");
-        HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-        Sleep(50);
-        title();
+        singleUpRight = char(191),
+        singleDownRight = char(217),
+        singleUpLeft = char(218),
+        singleDownLeft = char(192),
+        singleHorizont = char(196),
+        singleVertical = char(179);
 
-        gameCounter = 0;
+    HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
 
-        for (int i = 1; i < rows - 1; i++) {
-            area[i][0] = area[i][99] = '*';
-            for (int j = 1; j < columns - 1; j++) {
-                area[i][j] = ' ';
-            }
-        }
-        for (int j = 0; j < columns; j++) {
-            area[0][j] = '*';
-            area[20][j] = '*';
-        }//Создание границ поля
+    title();
 
-        car(area, lane);
+    int const rows = 23,
+        columns = 100;
 
-        //Создание полос дороги
-        for (int i = 1; i < columns - 1; i += 3) {
-            area[4][i] = '-';
-            area[8][i] = '-';
-            area[12][i] = '-';
-            area[16][i] = '-';
-        }
+    string topMenu,
+        midMenu,
+        bottMenu;
 
-        static int counter,
-            subCounterHeal;
-        
-        counter = 0;
-        subCounterHeal = 0;
-        
-
-        while (lose) {
-            gameCounter++;
-            subCounterHeal = (subCounterHeal + 1) % 77;
-            counter = (counter + 1) % speed;
-            for (int i = 1, j = 2; j < columns - 2 || i < columns - 2; j++, i++) {
-                static int subCounter = 0;
-                subCounter = (subCounter + 1) % 3;
-
-                area[4][i] = area[4][i + 1];
-                area[8][i] = area[8][i + 1];
-                area[12][i] = area[12][i + 1];
-                area[16][i] = area[16][i + 1];
-
-                area[4][columns - 2] = (subCounter == 2) ? '-' : ' ';
-                area[8][columns - 2] = (subCounter == 2) ? '-' : ' ';
-                area[12][columns - 2] = (subCounter == 2) ? '-' : ' ';
-                area[16][columns - 2] = (subCounter == 2) ? '-' : ' ';
-
-                //Перемещение препятствий
-                area[1][i] = area[1][i + 1];
-                area[2][i] = area[2][i + 1];
-                area[3][i] = area[3][i + 1];
-                area[5][i] = area[5][i + 1];
-                area[6][i] = area[6][i + 1];
-                area[7][i] = area[7][i + 1];
-                area[9][i] = area[9][i + 1];
-                area[10][i] = area[10][i + 1];
-                area[11][i] = area[11][i + 1];
-                area[13][i] = area[13][i + 1];
-                area[14][i] = area[14][i + 1];
-                area[15][i] = area[15][i + 1];
-                area[17][i] = area[17][i + 1];
-                area[18][i] = area[18][i + 1];
-                area[19][i] = area[19][i + 1];
-            }
-            for (int i = 1; i < 9; i++) {
-                if (area[lane][i] != '#' && area[lane][i] != '+') area[lane][i] = ' ';
-            }
-
-            delCar(area, lane);
-            if (_kbhit()) {
-                control = _getch();
-                switch (control) {
-                case 72: {
-                    if (lane > 2) {//ограничение поля
-                        lane -= 4;
-                    }
-                    break;
-                }
-                case 80: {
-                    if (lane < 18) {//ограничение поля
-                        lane += 4;
-                    }
-                    break;
-                }
-                case 27: {
-                    lose = pause();
-                    break;
-                }
-                }
-            }
-            if (area[lane][9] == '#' || area[lane][10] == '#' || area[lane][11] == '#' || area[lane][12] == '#') {
-                if (countHeal == 0) lose = false;
-                else countHeal--;
-            }//Завершение игры
-            if (area[lane][8] == '+' || area[lane][9] == '+' || area[lane][10] == '+' || area[lane][11] == '+' || area[lane][12] == '+') {
-                if (countHeal < 3) countHeal++;
-                else continue;
-            }//Получение бонуса
-            car(area, lane);
-
-
-
-            if (counter == 1) {
-                obstacle(area);
-            }
-            if (subCounterHeal == 74) heal(area);
-
-            showArea(area, gameCounter, countHeal, " ");
-            Sleep(50);
-        }
-        Lose(area);
-        showArea(area, gameCounter, 0, "Press any key to come back");
-        _getch();
-        lose = true;
-        system("cls");
+    topMenu += upLeft;
+    for (int i = 1; i < columns - 1; i++) {
+        topMenu += horizont;
     }
-    
-    return 0;
+    topMenu += upRight;
 
+    midMenu += vertical;
+    for (int i = 1; i < columns - 1; i++) {
+        midMenu += space;
+    }
+    midMenu += vertical;
+
+    bottMenu += downLeft;
+    for (int i = 1; i < columns - 1; i++) {
+        bottMenu += horizont;
+    }
+    bottMenu += downRight;
+
+    string areaMenu[rows];
+    areaMenu[0].append(topMenu);
+    for (int i = 1; i < rows - 1; i++) {
+        areaMenu[i].append(midMenu);
+    }
+    areaMenu[rows - 1].append(bottMenu);
+
+    const int sizePlay = 7;
+    string play[sizePlay]{
+        {singleUpLeft,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleUpRight},
+        {singleVertical,space,space,space,space,space,space,space,space,space,space,space,space,space,space,space,space,space,space,space,space,space,space,space,space,singleVertical},
+        {singleVertical,space,space,space,space,space,space,space,space,space,space,space,space,space,space,space,space,space,space,space,space,space,space,space,space,singleVertical},
+        {singleVertical,space,space,space,space,space,space,space,space,space,space,'P','L','A','Y',space,space,space,space,space,space,space,space,space,space,singleVertical},
+        {singleVertical,space,space,space,space,space,space,space,space,space,space,space,space,space,space,space,space,space,space,space,space,space,space,space,space,singleVertical},
+        {singleVertical,space,space,space,space,space,space,space,space,space,space,space,space,space,space,space,space,space,space,space,space,space,space,space,space,singleVertical},
+        {singleDownLeft,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleDownRight},
+    };
+
+    const int sizeRules = 5;
+    string rules[sizeRules]{
+        {singleUpLeft,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleUpRight},
+        {singleVertical,space,space,space,space,space,space,space,space,space,space,space,space,space,space,space,space,space,space,space,singleVertical},
+        {singleVertical,space,space,space,space,space,space,space,'R','U','L','E', 'S',space,space,space,space,space,space,space,singleVertical},
+        {singleVertical,space,space,space,space,space,space,space,space,space,space,space,space,space,space,space,space,space,space,space,singleVertical},
+        {singleDownLeft,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleHorizont,singleDownRight},
+    };
+
+    const int sizeEsc = 3;
+    string esc[sizeEsc]{
+        {singleUpLeft,singleHorizont,singleHorizont,singleHorizont,singleUpRight},
+        {singleVertical, 'E','S','C',singleVertical},
+        {singleDownLeft,singleHorizont,singleHorizont,singleHorizont,singleDownRight}
+    };
+
+    int blue = 11,
+        blackOnBlue = 176;
+    int currentKey;
+    //1 - play
+    //2 - rules
+    char chose;
+
+    currentKey = 1;
+
+    printElement(areaMenu, rows, 30, 10, blue, 15);
+    printElement(esc, sizeEsc, 31, 11, blue);
+    printElement(play, sizePlay, 65, 14, blackOnBlue);
+    printElement(rules, sizeRules, 68, 23, blue);
+
+    //13 - enter
+    //72 - ������� �����
+    //80 - ������� ����
+    //27 - esc
+
+    while (true) {
+        for (;;) {
+            chose = _getch();
+            if (chose == 27 || chose == 72 || chose == 80 || chose == 13)
+                break;
+        }
+        
+        switch (chose) {
+        case 27: {
+            return 1;
+        }
+        case 80:
+        case 72: {
+            if (currentKey == 2) {
+                printElement(play, sizePlay, 65, 14, blackOnBlue);
+                printElement(rules, sizeRules, 68, 23, blue);
+                currentKey = 1;
+            }
+            else {
+                printElement(play, sizePlay, 65, 14, blue);
+                printElement(rules, sizeRules, 68, 23, blackOnBlue);
+                currentKey = 2;
+            }
+            break;
+        }
+        case 13: {
+            if (currentKey == 1)
+                return 0;
+            else {
+                SetConsoleTextAttribute(handle, 15);
+                printRules();
+                printElement(areaMenu, rows, 30, 10, blue, 15);
+                printElement(esc, sizeEsc, 31, 11, blue);
+                printElement(play, sizePlay, 65, 14, blackOnBlue);
+                printElement(rules, sizeRules, 68, 23, blue);
+                title();
+                currentKey = 1;
+            }
+        }
+        }
+    }
 }
